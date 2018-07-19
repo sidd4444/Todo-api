@@ -19,9 +19,9 @@ app.get('/', function(req, res) {
 	res.send('todo api call');
 })
 
-// app.get('/todos', function(req, res) {
-// 	res.json(todos);
-// })
+app.get('/todos', function(req, res) {
+	res.json(todos);
+})
 
 app.get('/todos/:id', function(req, res) {
 	var matchedTodo;
