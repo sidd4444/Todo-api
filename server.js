@@ -9,19 +9,20 @@ var todoNextId = 1;
  
  app.use(bodyParser.json());
 
+// Get todos
 app.get('/todos', function(req, res) {
-	res.json(todos);
+	var queryParams = req.query;
+	var filteredTodos = todos;
+	if (queryParams.hasOwnProperty('completed') && (queryParams.completed === 'true')) {
+		filteredTodos = _.where(filteredTodos, { completed: true })
+	} else if (queryParams.hasOwnProperty('completed') && (queryParams.completed === 'false')) {
+		filteredTodos = _.where(filteredTodos, { completed: false })
+	}
+	res.json(filteredTodos);
 })
 
 app.get('/todos/:id', function(req, res) {
 	var matchedTodo = _.findWhere(todos, {id: parseInt(req.params.id)});
-	// todos.forEach(function(todo) {
-	// 	console.log(todo.id);
-	// 	if (parseInt(req.params.id) === todo.id) {
-	// 		matchedTodo = todo;
-			
-	// 	}
-	// });
 
 	if (matchedTodo) {
 		res.json(matchedTodo);
