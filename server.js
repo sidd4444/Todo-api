@@ -50,7 +50,7 @@ app.get('/todos', function(req, res) {
 		});
 	}
 	res.json(filteredTodos);*/
-})
+});
 
 // Get /todos/:id
 app.get('/todos/:id', function(req, res) {
@@ -120,7 +120,7 @@ app.delete('/todos/:id', function(req, res) {
 			console.log("Delete successfully:- " + rows);
 			res.status(204).send();
 		}
-		
+
 	}, function(error) {
 		res.status(500).send();
 		console.log('no todo found');
