@@ -180,6 +180,32 @@ app.put('/todos/:id', function(req, res) {
 
 });
 
+//// User Apis
+
+//
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+	db.user.create(body).then(function(todo) {
+		res.json(todo.toJSON());
+	}, function(error) {
+		res.status(400).json(error);
+	}).catch(function(error) {
+		res.status(400).json(error);
+	});
+	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+	// 	return res.status(400).send();
+	// }
+
+	// body.description = body.description.trim();
+
+	// body.id = todoNextId++;
+
+	// todos.push(body);
+
+	// res.json(body);
+
+});
+
 // Sync
 db.sequelize.sync().then(function() {
 	// Listner
