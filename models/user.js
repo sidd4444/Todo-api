@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
 		password: {
-			type: DataTypes.BOOLEAN,
+			type: DataTypes.STRING,
 			allowNull: false,
 			validate: {
 				len: [7, 100]
