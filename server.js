@@ -186,7 +186,7 @@ app.put('/todos/:id', function(req, res) {
 app.post('/users', function(req, res) {
 	var body = _.pick(req.body, 'email', 'password');
 	db.user.create(body).then(function(todo) {
-		res.json(todo.toJSON());
+		res.json(todo.toPublicJSON());
 	}, function(error) {
 		res.status(400).json(error);
 	}).catch(function(error) {
