@@ -57,14 +57,38 @@ module.exports = function(sequelize, DataTypes) {
 					}).then(function(userFound) {
 						console.log(!userFound);
 						if (userFound && bcrypt.compareSync(body.password, userFound.get('password_hash'))) {
-							 resolve(userFound);
+							resolve(userFound);
 						} else {
 							return reject();
 						}
 
 					}, function(error) {
-						 reject();
+						reject();
 					});
+				});
+			},
+			findByToken: function(token) {
+				return new Promise(function(resolve, reject) {
+					try {
+						console.log('token:-' + token);
+						var decodeJWT = jwt.verify(token, 'qwerty098');
+						console.log('decodeJWT:- ', decodeJWT);
+						var bytes = cryptojs.AES.decrypt(decodeJWT.token, 'abc123!@#!');
+						console.log('bytes:- ', bytes);
+						var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+						console.log('tokenData:- ', tokenData);
+						user.findById(tokenData.id).then(function(user) {
+							if (user) {	
+								resolve(user);
+							} else {
+								reject();
+							}
+						}, function(e) {
+							reject();
+						})
+					} catch (e) {
+						reject();
+					}
 				});
 			}
 		},
@@ -72,26 +96,32 @@ module.exports = function(sequelize, DataTypes) {
 			toPublicJSON: function() {
 				var json = this.toJSON();
 				return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
-			 },
+			},
 			generateToken: function(type) {
 				console.log('inside' + type);
-				 if (!_.isString(type)) {
-				 	return undefined;
-				 }
+				if (!_.isString(type)) {
+					return undefined;
+				}
 
-				 try {
-				 	var stringData = JSON.stringify({ id: this.get('id'), type: type});
-				 	var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123!@#!').toString();
-				 	var token = jwt.sign({
-				 		token: encryptedData
-				 	}, 'qwerty098');
-				 	return token;
-				 } catch(e) {
-				 	return undefined;
-				 }
+				try {
+					var stringData = JSON.stringify({
+						id: this.get('id'),
+						type: type
+					});
+					console.log('stringData:- ' + stringData);
+					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123!@#!').toString();
+					console.log('encryptedData:- ' + encryptedData);
+					var token = jwt.sign({
+						token: encryptedData
+					}, 'qwerty098');
+					console.log('token:- ' + token);
+					return token;
+				} catch (e) {
+					return undefined;
+				}
 			}
 		}
 	});
-return user;
-	
+	return user;
+
 };

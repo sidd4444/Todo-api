@@ -9,10 +9,12 @@ var PORT = process.env.PORT || 3000;
 var todos = [];
 var todoNextId = 1;
 
+var middleware = require('./middleware.js')(db);
+
 app.use(bodyParser.json());
 
 // Get /todos?completed=false&q=work
-app.get('/todos', function(req, res) {
+app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var query = req.query;
 	var where = {};
 
@@ -54,7 +56,7 @@ app.get('/todos', function(req, res) {
 });
 
 // Get /todos/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var todoId = parseInt(req.params.id);
 	db.todo.findById(todoId).then(function(todo) {
 		if (!!todo) {
@@ -82,7 +84,7 @@ app.get('/todos/:id', function(req, res) {
 });
 
 // Create new todo
-app.post('/todos', function(req, res) {
+app.post('/todos', middleware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
 	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
@@ -106,7 +108,7 @@ app.post('/todos', function(req, res) {
 });
 
 // DELETE
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var todoId = parseInt(req.params.id);
 	db.todo.destroy({
 		where: {
@@ -148,7 +150,7 @@ app.delete('/todos/:id', function(req, res) {
 
 
 // Update
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 
 	var body = _.pick(req.body, 'description', 'completed');
 	var todoId = parseInt(req.params.id);
@@ -211,33 +213,32 @@ app.post('/users', function(req, res) {
 //
 app.post('/users/login', function(req, res) {
 
-			var body = _.pick(req.body, 'email', 'password');
-			// db.user.authenticate(body).then(function(user) {
-			// 	res.json(user.toPublicJSON());
-			// }, function() {
-			// 	res.status(401).send()
-			// });
-			db.user.authenticate(body).then(function(user) {
-					var token = user.generateToken('authentication');
-					if (token) {
-						res.header('Auth', token).json(user.toPublicJSON());
-						}
-						else {
-							res.status(401).send();
-						}
-					},
-					function(error) {
-						console.log(error);
-						res.status(401).send();
-					});
-			});
-
-		// Sync
-		db.sequelize.sync({
-			force: true
-		}).then(function() {
-			// Listner
-			app.listen(PORT, function() {
-				console.log('server started at:- ' + PORT);
-			})
+	var body = _.pick(req.body, 'email', 'password');
+	// db.user.authenticate(body).then(function(user) {
+	// 	res.json(user.toPublicJSON());
+	// }, function() {
+	// 	res.status(401).send()
+	// });
+	db.user.authenticate(body).then(function(user) {
+			var token = user.generateToken('authentication');
+			if (token) {
+				res.header('Auth', token).json(user.toPublicJSON());
+			} else {
+				res.status(401).send();
+			}
+		},
+		function(error) {
+			console.log(error);
+			res.status(401).send();
 		});
+});
+
+// Sync
+db.sequelize.sync({
+	force: true
+}).then(function() {
+	// Listner
+	app.listen(PORT, function() {
+		console.log('server started at:- ' + PORT);
+	})
+});
