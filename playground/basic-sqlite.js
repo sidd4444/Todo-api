@@ -18,18 +18,49 @@ var Todo = sequelize.define('todo', {
 		defaultValue: false
 	}
 })
+
+var User = sequelize.define('user', {
+	email: Sequelize.STRING
+});
+
+// Setting RelationShip
+Todo.belongsTo(User);
+User.hasMany(Todo);
+
 sequelize.sync({
-	//	force: true
+	//force: true
 }).then(function() {
-	Todo.findById(4).then(function(todo) {
-		if (todo) {
-			console.log(todo.toJSON());
-		} else {
-			console.log('no todo found');
-		}
-	}).catch(function(error) {
-		console.log(error);
+
+	User.findById(1).then(function(user) {
+		user.getTodos({where: { completed: false} }).then(function(todos) {
+			todos.forEach(function(todo) {
+				console.log(todo.toJSON());
+			}); 
+		});
 	});
+	// User.create({
+	// 	email: "a@a.com",
+	// 	completed: false
+	// }).then(function() {
+	// 	return Todo.create({
+	// 		description: "Hello world123"
+	// 	});
+	// }).then(function(todo) {
+	// 	User.findById(1).then(function(user) {
+	// 		user.addTodo(todo);
+	// 	});
+	// }).catch(function(error) {
+	// 	console.log(error);
+	// });
+	// Todo.findById(4).then(function(todo) {
+	// 	if (todo) {
+	// 		console.log(todo.toJSON());
+	// 	} else {
+	// 		console.log('no todo found');
+	// 	}
+	// }).catch(function(error) {
+	// 	console.log(error);
+	// });
 	/*	console.log('everything is synced');
 		Todo.create({
 			description: "Hello world678",
